@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model PlatformLink {
+    uuid String @id @default(uuid())
+    platform Platform
+    link String @unique
+    song Song @relation(fields: [songId], references: [uuid])
+    songId String
+}
+
+model Song {
+    uuid String @id @default(uuid())
+    title String
+    artist String
+    platformLinks PlatformLink[]
+    playlists Playlist[]
+}
+
+model Playlist {
+    uuid String @id @default(uuid())
+    name String
+    accessedAt DateTime @default(now())
+    songs Song[]
+}
+
+enum Platform {
+    Spotify
+    ITunes
+    AppleMusic
+    Youtube
+    YoutubeMusic
+    Google
+    GoogleStore
+    Pandora
+    Deezer
+    Tidal
+    AmazonStore
+    AmazonMusic
+    SoundCloud
+    Napster
+    Yandex
+    Spinrilla
+    Audius
+    Anghami
+    Boomplay
+    Audiomack
+}
