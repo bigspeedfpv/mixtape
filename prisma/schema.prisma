@@ -16,6 +16,8 @@ model PlatformLink {
     link String @unique
     song Song @relation(fields: [songId], references: [uuid])
     songId String
+
+    @@index([link])
 }
 
 model Song {
