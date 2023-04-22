@@ -8,7 +8,7 @@ import { songRouter } from "~/server/api/routers/song";
  */
 export const appRouter = createTRPCRouter({
   song: songRouter,
-})
+});
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
