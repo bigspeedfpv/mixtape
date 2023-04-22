@@ -2,60 +2,60 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
-    relationMode = "prisma"
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model PlatformLink {
-    uuid String @id @default(uuid()) @db.VarChar(36)
-    platform Platform
-    link String @unique @db.VarChar(255)
-    song Song @relation(fields: [songId], references: [uuid])
-    songId String
+  uuid     String   @id @default(uuid()) @db.VarChar(36)
+  platform Platform
+  link     String   @unique @db.VarChar(255)
+  song     Song     @relation(fields: [songId], references: [uuid], onDelete: Cascade)
+  songId   String
 
-    @@index([songId])
-    @@index([link])
+  @@index([songId])
+  @@index([link])
 }
 
 model Song {
-    uuid String @id @default(uuid()) @db.VarChar(36)
-    title String @db.VarChar(255)
-    artist String @db.VarChar(255)
-    platformLinks PlatformLink[]
-    playlists Playlist[]
+  uuid          String         @id @default(uuid()) @db.VarChar(36)
+  title         String         @db.VarChar(255)
+  artist        String         @db.VarChar(255)
+  platformLinks PlatformLink[]
+  playlists     Playlist[]
 }
 
 model Playlist {
-    uuid String @id @default(uuid()) @db.VarChar(36)
-    name String @db.VarChar(255)
-    accessedAt DateTime @default(now())
-    songs Song[]
+  uuid       String   @id @default(uuid()) @db.VarChar(36)
+  name       String   @db.VarChar(255)
+  accessedAt DateTime @default(now())
+  songs      Song[]
 }
 
 enum Platform {
-    Spotify
-    ITunes
-    AppleMusic
-    Youtube
-    YoutubeMusic
-    Google
-    GoogleStore
-    Pandora
-    Deezer
-    Tidal
-    AmazonStore
-    AmazonMusic
-    SoundCloud
-    Napster
-    Yandex
-    Spinrilla
-    Audius
-    Anghami
-    Boomplay
-    Audiomack
+  spotify
+  itunes
+  appleMusic
+  youtube
+  youtubeMusic
+  google
+  googleStore
+  pandora
+  deezer
+  tidal
+  amazonStore
+  amazonMusic
+  soundcloud
+  napster
+  yandex
+  spinrilla
+  audius
+  audiomack
+  anghami
+  boomplay
 }

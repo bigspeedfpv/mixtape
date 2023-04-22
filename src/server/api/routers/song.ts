@@ -1,13 +1,15 @@
+import { type Song } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createPlatformLinkArray } from "~/utils/songlink";
 import { type SongLinkResponse } from "~/utils/types";
 
 export const songRouter = createTRPCRouter({
   getSongByLink: publicProcedure
     .input(z.object({ link: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }): Promise<Song> => {
       const platformLink = await ctx.prisma.platformLink.findUnique({
         where: { link: input.link },
         include: { song: true },
@@ -18,39 +20,66 @@ export const songRouter = createTRPCRouter({
       }
 
       const fetchedSong = await fetch(
-        "https://api.song.link/v1-alpha.1/links" +
-          new URLSearchParams({ url: input.link }).toString()
+        "https://api.song.link/v1-alpha.1/links?" +
+          new URLSearchParams({
+            url: input.link,
+            userCountry: "US",
+            songIfSingle: "true",
+          }).toString()
       );
 
       if (!fetchedSong.ok) {
-        return new TRPCError({ code: "NOT_FOUND" });
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
 
       const song = (await fetchedSong.json()) as SongLinkResponse;
-
-      // i hate the way this api works but i love songlink
-      const firstPlatform = Object.keys(song.entitiesByUniqueId)[0];
-
-      if (!firstPlatform) {
-        return new TRPCError({ code: "NOT_FOUND" });
+      const firstEntity = Object.values(song.entitiesByUniqueId)[0];
+      if (!firstEntity) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "No entity found",
+        });
       }
 
-      // lord forgive me
-      const songLinkArray = Object.values(song.linksByPlatform).map(
-        (link) => link.url
-      );
-
+      const platformLinkArray = createPlatformLinkArray(song.linksByPlatform);
       const existingPlatformLink = await ctx.prisma.platformLink.findFirst({
         where: {
-          link: { in: songLinkArray },
+          link: { in: platformLinkArray.map((link) => link.url) },
         },
         include: { song: true },
       });
 
       if (existingPlatformLink) {
-        const song = existingPlatformLink.song;
+        const existingSong = existingPlatformLink.song;
 
-        return song;
+        // create platform links if they don't already exist
+        await ctx.prisma.platformLink.createMany({
+          data: platformLinkArray.map((link) => ({
+            platform: link.platform,
+            link: link.url,
+            songId: existingSong.uuid,
+          })),
+          skipDuplicates: true,
+        });
+
+        return existingSong;
       }
+
+      const newSong = await ctx.prisma.song.create({
+        data: {
+          title: firstEntity.title || "Unknown",
+          artist: firstEntity.artistName || "Unknown",
+        },
+      });
+
+      await ctx.prisma.platformLink.createMany({
+        data: platformLinkArray.map((link) => ({
+          platform: link.platform,
+          link: link.url,
+          songId: newSong.uuid,
+        })),
+      });
+
+      return newSong;
     }),
 });

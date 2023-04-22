@@ -1,3 +1,4 @@
+import { type Song } from "@prisma/client";
 import * as Toast from "@radix-ui/react-toast";
 import { useAtom } from "jotai";
 import { type NextPage } from "next";
@@ -13,24 +14,24 @@ const Home: NextPage = () => {
   const [songsList, setSongsList] = useAtom(songsAtom);
   const [error, setError] = useState(false);
 
-  const fetchedSong = api.song.getSongByLink.useQuery(
+  const songQuery = api.song.getSongByLink.useQuery(
     { link: song },
-    { enabled: false, retry: false }
+    {
+      enabled: false,
+      retry: false,
+      onError: () => setError(true),
+      onSuccess: (data) => addSongToList(data),
+    }
   );
 
   const updateSong = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSong(e.target.value);
   };
 
-  const addSong = async () => {
-    await fetchedSong.refetch();
+  const addSongToList = (fetchedSong: Song) => {
+    if (songsList.find((s) => s.uuid === fetchedSong.uuid)) return;
 
-    if (fetchedSong.isError || !fetchedSong.data) {
-      setError(true);
-      return;
-    }
-
-    setSongsList((prev) => [...prev, fetchedSong.data]);
+    setSongsList((prev) => [...prev, fetchedSong]);
   };
 
   return (
@@ -42,19 +43,19 @@ const Home: NextPage = () => {
       </Head>
 
       <Toast.Provider>
-        <main className="flex min-h-screen flex-col items-center justify-center bg-gray-900">
-          <div className="flex items-center gap-4">
+        <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-100">
+          <div className="flex w-4/5 max-w-xl items-center gap-4">
             <input
               type="text"
               placeholder="Enter a song link..."
-              className="border-1 h-16 w-screen max-w-lg rounded-lg border-[1px] bg-gray-50 p-5 text-xl font-bold text-gray-800 shadow-lg outline-none transition duration-300 placeholder-shown:border-transparent placeholder-shown:bg-gray-700 placeholder-shown:font-normal placeholder-shown:text-slate-100 focus:bg-gray-50 focus:text-gray-800 focus:shadow-glow"
+              className="h-10 w-full max-w-lg rounded-lg border-[1px] border-black border-opacity-10 bg-gray-50 p-3 text-lg font-semibold text-gray-800 shadow-lg outline-none transition duration-300 placeholder-shown:font-normal hover:shadow-xl focus:shadow-glowBlue"
               onChange={updateSong}
             />
             <button
               onClick={() => {
-                void addSong();
+                void songQuery.refetch();
               }}
-              className="text-md rounded-lg border-[1px] border-white border-opacity-10 bg-blue-500 px-6 py-2 font-semibold text-white shadow-md transition duration-300 hover:shadow-glowBlue"
+              className="text-md h-10 rounded-lg border-[1px] border-white border-opacity-10 bg-blue-500 px-6 py-2 font-semibold text-white shadow-lg transition duration-300 hover:shadow-xl"
             >
               Add
             </button>

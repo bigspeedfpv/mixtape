@@ -1,66 +1,29 @@
+import { type Platform } from "@prisma/client";
+
 export type SongLinkResponse = {
   entityUniqueId: string;
   userCountry: string;
   pageUrl: string;
-  linksByPlatform: Record<string, Platform>;
-  entitiesByUniqueId: Record<string, Entity>;
+  linksByPlatform: Record<Platform, SonglinkPlatformLink>;
+  entitiesByUniqueId: Record<string, SonglinkEntity>;
 };
 
-type Platform = {
+export type SonglinkPlatformLink = {
+  country: string;
   entityUniqueId: string;
   url: string;
-  nativeAppUriMobile: string | null;
-  nativeAppUriDesktop: string | null;
+  nativeAppUriMobile?: string;
+  nativeAppUriDesktop?: string;
 };
 
-type Entity = {
+export type SonglinkEntity = {
   id: string;
   type: "song" | "album";
-  title: string | null;
-  artistName: string | null;
-  thumbnailUrl: string | null;
-  thumbnailWidth: number | null;
-  thumbnailHeight: number | null;
-  apiProvider: APIProvider;
-  platforms: Store[];
+  title?: string;
+  artistName?: string;
+  thumbnailUrl?: string;
+  thumbnailWidth?: number;
+  thumbnailHeight?: number;
+  apiProvider: Platform;
+  platforms: Platform[];
 };
-
-type Store =
-  | "spotify"
-  | "itunes"
-  | "appleMusic"
-  | "youtube"
-  | "youtubeMusic"
-  | "google"
-  | "googleStore"
-  | "pandora"
-  | "deezer"
-  | "tidal"
-  | "amazonStore"
-  | "amazonMusic"
-  | "soundcloud"
-  | "napster"
-  | "yandex"
-  | "spinrilla"
-  | "audius"
-  | "audiomack"
-  | "anghami"
-  | "boomplay";
-
-type APIProvider =
-  | "spotify"
-  | "itunes"
-  | "youtube"
-  | "google"
-  | "pandora"
-  | "deezer"
-  | "tidal"
-  | "amazon"
-  | "soundcloud"
-  | "napster"
-  | "yandex"
-  | "spinrilla"
-  | "audius"
-  | "audiomack"
-  | "anghami"
-  | "boomplay";
