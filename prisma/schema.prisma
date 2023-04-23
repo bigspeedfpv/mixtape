@@ -26,6 +26,7 @@ model Song {
   uuid          String         @id @default(uuid()) @db.VarChar(36)
   title         String         @db.VarChar(255)
   artist        String         @db.VarChar(255)
+  coverArt      String?        @db.VarChar(255)
   platformLinks PlatformLink[]
   playlists     Playlist[]
 }

@@ -69,6 +69,7 @@ export const songRouter = createTRPCRouter({
         data: {
           title: firstEntity.title || "Unknown",
           artist: firstEntity.artistName || "Unknown",
+          coverArt: firstEntity.thumbnailUrl,
         },
       });
 
