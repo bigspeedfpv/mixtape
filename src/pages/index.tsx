@@ -14,6 +14,8 @@ const Home: NextPage = () => {
   const [songsList, setSongsList] = useAtom(songsAtom);
   const [error, setError] = useState(false);
 
+  const createPlaylist = api.playlist.savePlaylist.useMutation();
+
   const songQuery = api.song.getSongByLink.useQuery(
     { link: song },
     {
@@ -63,7 +65,17 @@ const Home: NextPage = () => {
               Add
             </button>
           </div>
+
           <SongList editable />
+
+          <button
+            onClick={() => {
+              void createPlaylist.mutateAsync(songsList);
+            }}
+            className="text-md h-10 w-4/5 max-w-xl rounded-lg border-[1px] border-white border-opacity-10 bg-violet-500 px-6 py-2 font-semibold text-white shadow-lg transition duration-300 hover:shadow-xl"
+          >
+            Create Playlist
+          </button>
         </main>
 
         <Toast.Root open={error} onOpenChange={setError} className="ToastRoot">
