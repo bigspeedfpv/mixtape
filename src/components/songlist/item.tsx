@@ -16,8 +16,8 @@ export function Item(props: ItemProps) {
   const setSongsList = useSetAtom(songsAtom);
 
   const truncate = (str: string) => {
-    if (str.length > 32) {
-      return str.slice(0, 32) + "...";
+    if (str.length > 30) {
+      return str.slice(0, 30) + "...";
     }
     return str;
   };
