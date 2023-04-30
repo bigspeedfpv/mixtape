@@ -1,13 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-
-import { type Song } from "@prisma/client";
-import { useSetAtom } from "jotai";
 import React, { useMemo } from "react";
+
+import type { Platform, PlatformLink, Song } from "@prisma/client";
+import { useSetAtom } from "jotai";
 import { songsAtom } from "~/atoms";
+import { IconLink } from "@tabler/icons-react";
 
 type ItemProps = {
   editable: boolean;
-  song: Song;
+  platform?: Platform;
+  song: Song & { platformLinks?: PlatformLink[] };
 };
 
 export function Item(props: ItemProps) {
@@ -23,6 +25,15 @@ export function Item(props: ItemProps) {
   const [title, artist] = useMemo(() => {
     return [truncate(props.song.title), truncate(props.song.artist)];
   }, [props.song.title, props.song.artist]);
+
+  // db returns links for EVERY platform so we just filter them down here
+  const url = useMemo(() => {
+    if (props.platform) {
+      return props.song.platformLinks?.find(
+        (link) => link.platform === props.platform
+      )?.link;
+    }
+  }, [props.platform, props.song.platformLinks]);
 
   const removeSong = (uuid: string) => {
     setSongsList((prev) => prev.filter((song) => song.uuid !== uuid));
@@ -43,7 +54,13 @@ export function Item(props: ItemProps) {
 
       <span className="h-[1px] grow bg-black opacity-10"></span>
 
-      {props.editable && (
+      {props.platform && (
+        <a title="Song Link" href={url} target="_blank" rel="noreferrer">
+          <IconLink size={24} className="opacity-50" />
+        </a>
+      )}
+
+      {props.editable && url && (
         <button
           onClick={() => {
             removeSong(props.song.uuid);
