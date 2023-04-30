@@ -15,16 +15,19 @@ type ItemProps = {
 export function Item(props: ItemProps) {
   const setSongsList = useSetAtom(songsAtom);
 
-  const truncate = (str: string) => {
-    if (str.length > 30) {
-      return str.slice(0, 30) + "...";
-    }
-    return str;
-  };
+  const truncLength = props.editable ? 30 : 38;
 
+  // title and artist are truncated - memoized because this won't change unless song does
   const [title, artist] = useMemo(() => {
+    const truncate = (str: string) => {
+      if (str.length > truncLength) {
+        return str.slice(0, truncLength) + "...";
+      }
+      return str;
+    };
+
     return [truncate(props.song.title), truncate(props.song.artist)];
-  }, [props.song.title, props.song.artist]);
+  }, [props.song.title, props.song.artist, truncLength]);
 
   // db returns links for EVERY platform so we just filter them down here
   const url = useMemo(() => {

@@ -1,10 +1,6 @@
 import React from "react";
 
-import type {
-  GetStaticPaths,
-  GetStaticProps,
-  NextPage,
-} from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { type Platform, PrismaClient, type Song } from "@prisma/client";
 import SongList from "~/components/songlist";
 import { songsAtom } from "~/atoms";
