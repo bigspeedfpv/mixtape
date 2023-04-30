@@ -57,13 +57,13 @@ export function Item(props: ItemProps) {
 
       <span className="h-[1px] grow bg-black opacity-10"></span>
 
-      {props.platform && (
+      {props.platform && url && (
         <a title="Song Link" href={url} target="_blank" rel="noreferrer">
           <IconLink size={24} className="opacity-50" />
         </a>
       )}
 
-      {props.editable && url && (
+      {props.editable && (
         <button
           onClick={() => {
             removeSong(props.song.uuid);
